@@ -23,14 +23,14 @@ const authMiddleware = (req, res, next)=>{
         return res.status(403).json({ message: "Invalid token" });
     }
 }
-// Configure Multer for file upload
+
 const storage = multer.diskStorage({
     destination: "./uploads",
     filename: (req, file, cb) => {
       cb(null, `${uuidv4()}-${file.originalname}`);
     },
   });
-  const upload = multer({ storage });
+const upload = multer({ storage });
   
 router.post("/upload", authMiddleware, upload.single("file"), async (req, res) => {
     const fileCode = Math.floor(100000 + Math.random() * 900000); // 6-digit code
