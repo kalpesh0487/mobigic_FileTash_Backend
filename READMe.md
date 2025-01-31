@@ -1,4 +1,4 @@
-steps to run NodeJs File Management project
+steps to run NodeJs File Management project backend 
 
 1) In the terminal install node_modules by using "npm i"
 2) Create .env file and create mongoDb string or copy paste below credentials
