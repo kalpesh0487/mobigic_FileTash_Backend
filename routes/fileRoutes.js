@@ -47,7 +47,8 @@ router.post("/upload", authMiddleware, upload.single("file"), async (req, res) =
 });
   
 // Get uploaded files for user
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/get", authMiddleware, async (req, res) => {
+  console.log("reached getcode")
     try {
         const token = req.headers.authorization?.split(" ")[1];
         if (!token) {
@@ -71,9 +72,25 @@ router.get("/", authMiddleware, async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+// getting all files for download
+router.get("/getAll", async (req, res) => {
+  try {
+      // Fetch all files from the database
+      const files = await File.find().select("-__v"); // Exclude __v field
+
+      if (files.length === 0) {
+          return res.status(404).json({ message: "No files found" });
+      }
+
+      res.json(files);
+  } catch (error) {
+      res.status(500).json({ error: "Server error" });
+  }
+});
   
 // Delete the file
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/delete/:id", authMiddleware, async (req, res) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
         if (!token) {
@@ -133,5 +150,28 @@ router.post("/download/:fileId", async (req, res) => {
     res.download(file.path, file.originalName);
     
 });
+
+router.post("/download", async (req, res) => {
+  console.log("Downloading file from frontend");
+
+  const { code } = req.body;  // Get the code from the request body
+  if (!code) return res.status(400).json({ message: "File code is required" });
+  console.log("code", code)
+  // Find the file based on the fileCode
+  const file = await File.findOne({ fileCode: parseInt(code) });
+
+  console.log("file", file);
+
+  if (!file) return res.status(404).json({ message: "File not found" });
+  
+  // Download the file
+  res.download(file.path, file.originalName, (err) => {
+      if (err) {
+          console.error("Error downloading file:", err);
+          res.status(500).json({ message: "Error downloading file" });
+      }
+  });
+});
+
   
 module.exports = router;
